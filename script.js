@@ -1,5 +1,5 @@
 let placesService;
-
+let currentUserLocation;
 function initMap() {
   placesService = new google.maps.places.PlacesService(document.createElement('div'));
 }
@@ -12,7 +12,9 @@ function getUserLocation() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        searchPlaces(userLocation);
+        currentUserLocation = userLocation;
+        console.log(currentUserLocation)
+        // searchPlaces(currentUserLocation);
       },
       error => {
         alert('Error getting user location: ' + error.message);
@@ -23,7 +25,7 @@ function getUserLocation() {
   }
 }
 
-function searchPlaces(userLocation) {
+function searchPlaces(currentUserLocation) {
   const placeInput = document.getElementById('place-input').value;
   const radiusInput = document.getElementById('radius-input').value;
 
@@ -34,10 +36,13 @@ function searchPlaces(userLocation) {
 
   const request = {
     query: placeInput,
-    radius: parseInt(radiusInput),
-    location: userLocation,
   };
 
+  if (currentUserLocation) {
+    request.location = currentUserLocation;
+    request.radius = parseInt(radiusInput);
+  }
+  
   placesService.textSearch(request, (results, status) => {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
       displayResults(results);
@@ -67,3 +72,5 @@ function displayResults(results) {
     resultsContainer.appendChild(resultItem);
   });
 }
+
+getUserLocation();
